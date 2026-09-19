@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -57,9 +57,9 @@
         }
 
         .logo-container {
-            width: 240px; 
-            height: 240px; 
-            border-radius: 20px; 
+            width: 240px;
+            height: 240px;
+            border-radius: 20px;
             overflow: hidden;
             background-color: white;
             display: flex;
@@ -77,10 +77,10 @@
         .logo-container img {
             width: 100%;
             height: 100%;
-            object-fit: contain; 
+            object-fit: contain;
             display: block;
             background-color: white;
-            padding: 5px; 
+            padding: 5px;
         }
 
         .titles h1 {
@@ -107,7 +107,7 @@
             border-radius: 20px;
             display: inline-block;
         }
-        
+
         .unit-badge {
             background: var(--warning);
             color: var(--dark);
@@ -457,7 +457,7 @@
         @media (max-width: 768px) {
             header { padding: 25px 20px; flex-direction: column; text-align: center; }
             .header-content { flex-direction: column; gap: 15px; }
-            .logo-container { width: 160px; height: 160px; } 
+            .logo-container { width: 160px; height: 160px; }
             .titles h1 { font-size: 1.8rem; }
             .titles h2 { font-size: 1.2rem; }
             .option-btn { font-size: 1.1rem; padding: 15px; }
@@ -513,6 +513,10 @@
                     <i class="fas fa-keyboard"></i>
                     <h3>Correct Sentences</h3>
                 </div>
+                <div class="game-card" onclick="startGame(6)">
+                    <i class="fas fa-pen-fancy"></i>
+                    <h3>Rewrite Sentences</h3>
+                </div>
             </div>
         </div>
 
@@ -523,9 +527,9 @@
                 <h3>Question <span id="q-number">1</span> / <span id="total-q">25</span></h3>
                 <h3>Score: <span id="score-display">0</span></h3>
             </div>
-            
+
             <div id="question-container" class="question-text"></div>
-            
+
             <!-- Game 1 & 4 Area -->
             <div id="options-container" class="options-grid"></div>
 
@@ -576,10 +580,10 @@
             }
             const oscillator = audioCtx.createOscillator();
             const gainNode = audioCtx.createGain();
-            
+
             oscillator.connect(gainNode);
             gainNode.connect(audioCtx.destination);
-            
+
             if (type === 'correct') {
                 oscillator.type = 'sine';
                 oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
@@ -613,11 +617,27 @@
             { q: "He (is not going to skips) the class.", bracket: "Correct the mistake", ans: ["He is not going to skip the class", "He is not going to skip the class."] }
         ];
 
+        const rewriteTemplates2 = [
+            { q: "I become a doctor.", bracket: "going to", ans: ["I am going to become a doctor", "I am going to become a doctor."] },
+            { q: "She studies engineering.", bracket: "going to", ans: ["She is going to study engineering", "She is going to study engineering."] },
+            { q: "They travel abroad next year.", bracket: "going to", ans: ["They are going to travel abroad next year", "They are going to travel abroad next year."] },
+            { q: "He works hard to achieve his goal.", bracket: "going to", ans: ["He is going to work hard to achieve his goal", "He is going to work hard to achieve his goal."] },
+            { q: "We graduate next summer.", bracket: "going to", ans: ["We are going to graduate next summer", "We are going to graduate next summer."] },
+            { q: "I achieve my dream job.", bracket: "going to", ans: ["I am going to achieve my dream job", "I am going to achieve my dream job."] },
+            { q: "My friend graduates this year.", bracket: "going to", ans: ["My friend is going to graduate this year", "My friend is going to graduate this year."] },
+            { q: "The astronauts explore space.", bracket: "going to", ans: ["The astronauts are going to explore space", "The astronauts are going to explore space."] },
+            { q: "She takes part in the workshop.", bracket: "going to", ans: ["She is going to take part in the workshop", "She is going to take part in the workshop."] },
+            { q: "We plan our future carefully.", bracket: "going to", ans: ["We are going to plan our future carefully", "We are going to plan our future carefully."] }
+        ];
+
         const generateQuestions = (count, type) => {
             if (type === 'REWRITE') {
                 return [...rewriteTemplates].sort(() => Math.random() - 0.5).slice(0, 10);
             }
-            
+            if (type === 'REWRITE2') {
+                return [...rewriteTemplates2].sort(() => Math.random() - 0.5).slice(0, 10);
+            }
+
             // Multiple Choice / TF questions based on Unit 1 Grammar (Present Simple)
             const templates = [
                 { text: "I _____ to become a doctor.", ans: "am going", wrong: ["is going", "are going", "go"] },
@@ -703,7 +723,7 @@
                 // If submit is visible and enabled, submit. If next is visible, go next.
                 const submitBtn = document.getElementById('btn-submit-rewrite');
                 const nextBtn = document.getElementById('btn-next-rewrite');
-                
+
                 if (submitBtn.style.display !== 'none' && !submitBtn.disabled) {
                     submitRewrite();
                 } else if (nextBtn.style.display !== 'none') {
@@ -742,25 +762,26 @@
             score = 0;
             mistakes = [];
             clearGameIntervals();
-            
+
             let type = 'MCQ';
             if (gameId === 4) type = 'TF';
             if (gameId === 5) type = 'REWRITE';
-            
+            if (gameId === 6) type = 'REWRITE2';
+
             // Generate 25 questions for MCQ/TF/Games, 10 for Rewrite
-            let qCount = (gameId === 5) ? 10 : 25;
+            let qCount = (gameId === 5 || gameId === 6) ? 10 : 25;
             currentQuestionsList = generateQuestions(qCount, type);
             totalQuestions = currentQuestionsList.length;
             totalQSpan.innerText = totalQuestions;
-            
+
             scoreSpan.innerText = score;
             switchScreen('game-screen');
-            
+
             optionsContainer.style.display = 'none';
             bubblesArea.style.display = 'none';
             targetsArea.style.display = 'none';
             rewriteArea.style.display = 'none';
-            
+
             loadQuestion();
         }
 
@@ -792,18 +813,26 @@
             } else if (currentGameId === 3) {
                 targetsArea.style.display = 'block';
                 startTargetsGame(qData);
-            } else if (currentGameId === 5) {
+            } else if (currentGameId === 5 || currentGameId === 6) {
                 rewriteArea.style.display = 'block';
-                rewriteBracket.innerText = `${qData.q}`;
-                qContainer.style.display = 'none'; // Hide main question text for rewrite
+                const rewriteInstructionEl = document.querySelector('#rewrite-area .rewrite-instruction');
+                if (currentGameId === 5) {
+                    rewriteInstructionEl.innerText = 'Rewrite the sentence correcting the word(s) in brackets:';
+                    rewriteBracket.innerText = `${qData.q}`;
+                    qContainer.style.display = 'none'; // Hide main question text for rewrite
+                } else {
+                    rewriteInstructionEl.innerText = 'Rewrite the sentence using the word in brackets:';
+                    rewriteBracket.innerText = `(${qData.bracket})`;
+                    qContainer.style.display = 'block';
+                }
                 rewriteInput.value = '';
                 rewriteInput.disabled = false;
                 rewriteInput.style.borderColor = "#cbd5e1";
-                
+
                 const submitBtn = document.getElementById('btn-submit-rewrite');
                 submitBtn.disabled = false;
                 submitBtn.style.display = 'inline-block';
-                
+
                 document.getElementById('btn-next-rewrite').style.display = 'none';
                 document.getElementById('rewrite-feedback').innerHTML = '';
                 setTimeout(() => rewriteInput.focus(), 100);
@@ -816,13 +845,13 @@
 
         function submitRewrite() {
             const userInput = rewriteInput.value;
-            if(!userInput.trim()) return; 
+            if(!userInput.trim()) return;
 
             const qData = currentQuestionsList[currentQuestionIndex];
             const normalizedUser = normalizeString(userInput);
 
             let isCorrect = false;
-            let correctAnsStr = qData.ans[0]; 
+            let correctAnsStr = qData.ans[0];
 
             for (let possibleAns of qData.ans) {
                 if (normalizedUser === normalizeString(possibleAns)) {
@@ -849,7 +878,7 @@
                 playSound('wrong');
                 showFeedbackIcon(false);
                 mistakes.push({
-                    q: qData.q,
+                    q: (currentGameId === 6) ? `${qData.q} (${qData.bracket})` : qData.q,
                     correct: correctAnsStr
                 });
                 feedbackDiv.innerHTML = `<span style="color: var(--danger);"><i class="fas fa-times"></i> Answer: ${correctAnsStr}</span>`;
@@ -868,8 +897,8 @@
         }
 
         function handleAnswer(isCorrect, selectedOpt, qData) {
-            clearGameIntervals(); 
-            
+            clearGameIntervals();
+
             if (isCorrect) {
                 playSound('correct');
                 showFeedbackIcon(true);
@@ -904,34 +933,34 @@
             bubblesArea.innerHTML = '';
             const width = bubblesArea.clientWidth;
             const height = bubblesArea.clientHeight;
-            
+
             const segmentWidth = width / qData.options.length;
-            
+
             qData.options.forEach((opt, i) => {
                 const bubble = document.createElement('div');
                 bubble.className = 'bubble';
                 bubble.innerText = opt;
-                const size = 80 + Math.random() * 20; 
+                const size = 80 + Math.random() * 20;
                 bubble.style.width = size + 'px';
                 bubble.style.height = size + 'px';
-                
+
                 let minLeft = i * segmentWidth;
                 let maxLeft = (i + 1) * segmentWidth - size;
-                if (maxLeft < minLeft) maxLeft = minLeft; 
-                
+                if (maxLeft < minLeft) maxLeft = minLeft;
+
                 bubble.style.left = (minLeft + Math.random() * (maxLeft - minLeft)) + 'px';
                 bubble.style.top = '-150px';
-                
+
                 bubble.onclick = () => handleAnswer(opt === qData.answer, opt, qData);
                 bubblesArea.appendChild(bubble);
 
-                let currentTop = -100 - (Math.random() * 150); 
+                let currentTop = -100 - (Math.random() * 150);
                 let speed = 0.25 + Math.random() * 0.25; // Medium speed: faster but not too fast
-                
+
                 const interval = setInterval(() => {
                     currentTop += speed;
                     bubble.style.top = currentTop + 'px';
-                    
+
                     if (currentTop > height) {
                         clearInterval(interval);
                         if (opt === qData.answer) {
@@ -947,33 +976,33 @@
             targetsArea.innerHTML = '';
             const height = targetsArea.clientHeight;
             const width = targetsArea.clientWidth;
-            
+
             const rowHeight = height / qData.options.length;
-            
+
             qData.options.forEach((opt, i) => {
                 const target = document.createElement('div');
                 target.className = 'target';
                 target.innerText = opt;
-                
+
                 targetsArea.appendChild(target);
                 const targetHeight = target.offsetHeight || 50;
 
                 let minTop = i * rowHeight;
                 let maxTop = (i + 1) * rowHeight - targetHeight;
-                if (maxTop < minTop) maxTop = minTop; 
+                if (maxTop < minTop) maxTop = minTop;
 
                 target.style.top = (minTop + Math.random() * (maxTop - minTop)) + 'px';
-                target.style.left = '-250px'; 
-                
+                target.style.left = '-250px';
+
                 target.onclick = () => handleAnswer(opt === qData.answer, opt, qData);
 
-                let currentLeft = -200 - (Math.random() * 150); 
-                let speed = 0.8 + Math.random() * 0.5; 
-                
+                let currentLeft = -200 - (Math.random() * 150);
+                let speed = 0.8 + Math.random() * 0.5;
+
                 const interval = setInterval(() => {
                     currentLeft += speed;
                     target.style.left = currentLeft + 'px';
-                    
+
                     if (currentLeft > width) {
                         clearInterval(interval);
                         if (opt === qData.answer) {
@@ -990,10 +1019,10 @@
             switchScreen('results-screen');
             document.getElementById('final-score').innerText = score;
             document.getElementById('final-total').innerText = totalQuestions;
-            
+
             const mistakesContainer = document.getElementById('mistakes-container');
             mistakesContainer.innerHTML = '';
-            
+
             if (mistakes.length === 0) {
                 mistakesContainer.innerHTML = '<div style="color:var(--success); font-weight:800; font-size:1.5rem; text-align:center;">Excellent! No mistakes.</div>';
             } else {
